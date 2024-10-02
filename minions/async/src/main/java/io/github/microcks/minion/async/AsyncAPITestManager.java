@@ -24,6 +24,7 @@ import io.github.microcks.minion.async.consumer.AmazonSNSMessageConsumptionTask;
 import io.github.microcks.minion.async.consumer.AmazonSQSMessageConsumptionTask;
 import io.github.microcks.minion.async.consumer.ConsumedMessage;
 import io.github.microcks.minion.async.consumer.GooglePubSubMessageConsumptionTask;
+import io.github.microcks.minion.async.consumer.IBMMQMessageConsumptionTask;
 import io.github.microcks.minion.async.consumer.KafkaMessageConsumptionTask;
 import io.github.microcks.minion.async.consumer.MQTTMessageConsumptionTask;
 import io.github.microcks.minion.async.consumer.MessageConsumptionTask;
@@ -338,6 +339,9 @@ public class AsyncAPITestManager {
             return new AmazonSQSMessageConsumptionTask(testSpecification);
          }
          if (AmazonSNSMessageConsumptionTask.acceptEndpoint(testSpecification.getEndpointUrl().trim())) {
+            return new AmazonSNSMessageConsumptionTask(testSpecification);
+         }
+         if (IBMMQMessageConsumptionTask.acceptEndpoint(testSpecification.getEndpointUrl().trim())) {
             return new AmazonSNSMessageConsumptionTask(testSpecification);
          }
          return null;
