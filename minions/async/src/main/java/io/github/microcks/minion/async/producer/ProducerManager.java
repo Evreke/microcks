@@ -65,6 +65,7 @@ public class ProducerManager {
    final GooglePubSubProducerManager googlePubSubProducerManager;
    final AmazonSQSProducerManager amazonSQSProducerManager;
    final AmazonSNSProducerManager amazonSNSProducerManager;
+   final IBMMQProducerManager ibmmqProducerManager;
 
    @Inject
    @RootWebSocketProducerManager
@@ -80,7 +81,7 @@ public class ProducerManager {
          KafkaProducerManager kafkaProducerManager, MQTTProducerManager mqttProducerManager,
          NATSProducerManager natsProducerManager, AMQPProducerManager amqpProducerManager,
          GooglePubSubProducerManager googlePubSubProducerManager, AmazonSQSProducerManager amazonSQSProducerManager,
-         AmazonSNSProducerManager amazonSNSProducerManager) {
+         AmazonSNSProducerManager amazonSNSProducerManager, IBMMQProducerManager ibmmqProducerManager) {
       this.mockRepository = mockRepository;
       this.schemaRegistry = schemaRegistry;
       this.kafkaProducerManager = kafkaProducerManager;
@@ -90,6 +91,7 @@ public class ProducerManager {
       this.googlePubSubProducerManager = googlePubSubProducerManager;
       this.amazonSQSProducerManager = amazonSQSProducerManager;
       this.amazonSNSProducerManager = amazonSNSProducerManager;
+      this.ibmmqProducerManager = ibmmqProducerManager;
    }
 
    /**
@@ -133,6 +135,9 @@ public class ProducerManager {
                      break;
                   case SNS:
                      produceSNSMockMessages(definition);
+                     break;
+                  case IBM:
+                     produceIBMMQMockMessages(definition);
                      break;
                   default:
                      break;
@@ -256,6 +261,16 @@ public class ProducerManager {
          String topicName = amazonSNSProducerManager.getTopicName(definition, eventMessage);
          String message = renderEventMessageContent(eventMessage);
          amazonSNSProducerManager.publishMessage(topicName, message, amazonSNSProducerManager
+               .renderEventMessageHeaders(TemplateEngineFactory.getTemplateEngine(), eventMessage.getHeaders()));
+      }
+   }
+
+   /** Take care publishing SNS mock messages for definition. */
+   protected void produceIBMMQMockMessages(AsyncMockDefinition definition) {
+      for (EventMessage eventMessage : definition.getEventMessages()) {
+         String queueName = ibmmqProducerManager.getQueueName(definition, eventMessage);
+         String message = renderEventMessageContent(eventMessage);
+         ibmmqProducerManager.sendMessage(queueName, message, ibmmqProducerManager
                .renderEventMessageHeaders(TemplateEngineFactory.getTemplateEngine(), eventMessage.getHeaders()));
       }
    }
